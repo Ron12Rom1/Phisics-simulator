@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 # Initialize pygame
 pygame.init()
@@ -158,11 +159,18 @@ def calc_vector(x1, y1, x2, y2, flip = False):
         return [float(x1) - float(x2), float(y1) - float(y2)]
     return [float(x2) - float(x1), float(y2) - float(y1)]
 
-def draw_start_point_for_catapuled_ball(original_x, original_y):
+def draw_start_point_for_catapuled_ball(original_x, original_y, color):
     if original_x == None or original_y == None:
         return
-    pygame.draw.circle(window, (255, 0, 0), (original_x, original_y), 5)
+    pygame.draw.circle(window, color, (original_x, original_y), 5)
 
+def draw_line_for_catapulted_ball(original_x, original_y, mouse_x, mouse_y, color):
+    if original_x == None or original_y == None:
+        return
+    d = distance(original_x, original_y, mouse_x, mouse_y)
+    size = 2 / d * 500
+    color = balls[heled_ball]["color"]
+    pygame.draw.line(window, (color[0] * 0.8, color[1] * 0.8, color[2] * 0.8), (original_x, original_y), (mouse_x, mouse_y), int(min(size, 10)))
 
 # Reset all variables
 def reset_all():
@@ -245,8 +253,12 @@ while running:
         else:
             balls[heled_ball]["x"] = mouse_x
             balls[heled_ball]["y"] = mouse_y
+
             # Draw the starting point for the catapulted ball
-            draw_start_point_for_catapuled_ball(original_x, original_y)
+            color = balls[heled_ball]["color"]
+            color = (color[0] * 0.8, color[1] * 0.8, color[2] * 0.8)
+            draw_start_point_for_catapuled_ball(original_x, original_y, color)
+            draw_line_for_catapulted_ball(original_x, original_y, mouse_x, mouse_y, color)
     elif not pygame.mouse.get_pressed()[2] and keys[pygame.K_LCTRL] and heled_ball != None and original_x and original_y:
         if len(balls) > 0 and heled_ball != None:
             new_vector_x, new_vector_y = calc_vector(original_x, original_y, mouse_x, mouse_y, flip = True)
