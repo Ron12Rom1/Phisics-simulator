@@ -35,6 +35,8 @@ colors = {
     "Platinum": (229, 228, 226),
 }
 
+
+# Balls stuff
 def create_ball(x, y, xv, yv, radius, color = None):
     if color == None:
         color = random.choice(list(colors.values()))
@@ -45,7 +47,6 @@ def create_ball(x, y, xv, yv, radius, color = None):
 def draw_all_balls():
     for ball in balls:
         pygame.draw.circle(window, ball['color'], (ball['x'], ball['y']), ball['radius'])
-
 
 def simulate_physics():
     epsilon = 0.1  # Small threshold to prevent sinking
@@ -117,8 +118,7 @@ def simulate_physics():
                     ball2['vector']['x'] += (v1n - v2n) * dx_norm
                     ball2['vector']['y'] += (v1n - v2n) * dy_norm
 
-
-
+# Floor stuff
 def create_floor():
     floor = {'x': 0, 'y': window_size[1] - 25, 'vector': {'x': 0, 'y': 0}, 'radius': 0, 'color': ( 200, 200, 200)}
     every_obj.append(floor)
@@ -126,13 +126,16 @@ def create_floor():
 def draw_floor():
     pygame.draw.rect(window, (200, 200, 200), (0, window_size[1] - 25, window_size[0], 25))
 
+
 # Useful functions
 def distance(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
-def check_colision(obj1, obj2):
+def check_colision(obj1, obj2) -> bool:
     return obj1['x'] < obj2['x'] + obj2['radius'] and obj1['x'] + obj1['radius'] > obj2['x'] and obj1['y'] < obj2['y'] + obj2['radius'] and obj1['y'] + obj1['radius'] > obj2['y']
 
+
+# Change all globla ball values
 def change_color_for_all_balls(color):
     for ball in balls:
         ball['color'] = color
@@ -159,6 +162,7 @@ def calc_vector(x1, y1, x2, y2, flip = False):
         return [float(x1) - float(x2), float(y1) - float(y2)]
     return [float(x2) - float(x1), float(y2) - float(y1)]
 
+# Catapulted ball stuff
 def draw_start_point_for_catapuled_ball(original_x, original_y, color):
     if original_x == None or original_y == None:
         return
@@ -171,6 +175,7 @@ def draw_line_for_catapulted_ball(original_x, original_y, mouse_x, mouse_y, colo
     size = 2 / d * 500
     color = balls[heled_ball]["color"]
     pygame.draw.line(window, (color[0] * 0.8, color[1] * 0.8, color[2] * 0.8), (original_x, original_y), (mouse_x, mouse_y), int(min(size, 10)))
+
 
 # Reset all variables
 def reset_all():
@@ -190,7 +195,7 @@ every_obj = []
 mouse_pos = []
 
 # Set up the display
-window_size = (1000, 600)
+window_size = (1200, 700)
 window = pygame.display.set_mode(window_size)
 pygame.display.set_caption("Black Window")
 
