@@ -195,13 +195,45 @@ def draw_help_menu():
         "   H: - - - - - - - - - - - - - - - - - - - Show help menu",
         "   UP/DOWN Arrow: - - - - - - - Change bounce factor",
         "   SPACE: - - - - - - - - - - - - - - - Pause/Resume physics",
-        "   SHIFT: - - - - - - - - - - - - - - - Toggle color based on velocity",
-        "   CTRL + K/L: - - - - - - - - - - - Increase/Decrease default ball size when creating new balls",
-        "   K/L: - - - - - - - - - - - - - - - - - Increase/Decrease size of all existing balls"
+        "   SHIFT: - - - - - - - - - - - - - - - - Toggle color based on velocity",
+        "   CTRL + K/L: - - - - - - - - - - - - Increase/Decrease default ball size when creating new balls",
+        "   K/L: - - - - - - - - - - - - - - - - - - Increase/Decrease size of all existing balls",
+        "   I: - - - - - - - - - - - - - - - - - - - - Show info menu",
+        "   Q: - - - - - - - - - - - - - - - - - - - Quit",
     ]
     for i, text in enumerate(help_texts):
         rendered_text = font.render(text, True, (255, 255, 255))
         window.blit(rendered_text, (100, 90 + i * 35))
+    
+    # Draw small text at the bottom of the info menu
+    small_text = font = pygame.font.Font(None, 24).render("Press ESC to close this menu", True, (255, 255, 255))
+    window.blit(small_text, (100, 90 + len(help_texts) * 35 + 30))
+
+
+def draw_info_menu():
+    # Close info menu
+    global info_menu_pressed
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_ESCAPE]:
+        info_menu_pressed = False
+    
+    # Draw info menu text
+    font = pygame.font.Font(None, 46)
+    info_texts = [
+        "Phisics Simulator",
+        "   Created by: Ron [ Ron12Rom1 ] ",
+        "   Version: [ 1.18.1 ]",
+        "   Github: https://github.com/ron12rom1",
+
+    ]
+    for i, text in enumerate(info_texts):
+        rendered_text = font.render(text, True, (255, 255, 255))
+        window.blit(rendered_text, (100, 90 + i * 55))
+    
+    # Draw small text at the bottom of the info menu
+    small_text = font = pygame.font.Font(None, 24).render("Press ESC to close this menu", True, (255, 255, 255))
+    window.blit(small_text, (100, 90 + len(info_texts) * 55 + 30))
+
 # Reset all variables
 def reset_all():
     balls.clear()
@@ -238,7 +270,13 @@ default_ball_size = 20
 global heled_ball
 heled_ball = None
 help_menu_pressed = False
+info_menu_pressed = False
 original_x, original_y = None, None
+
+# Create transperent surface
+TransperentRect = pygame.Surface((window_size[0], window_size[1]))
+TransperentRect.set_alpha(200)                # Alpha level
+TransperentRect.fill((0,0,0))           # Black fill
 
 # Create floor
 create_floor()
@@ -322,6 +360,9 @@ while running:
     # Toggle help menu
     if keys[pygame.K_h]:
         help_menu_pressed = True
+    # Toggle info menu
+    if keys[pygame.K_i]:
+        info_menu_pressed = True
     # Change the bounce factor
     if keys[pygame.K_UP]:
         bounce_factor -= 0.01
@@ -371,13 +412,13 @@ while running:
     window.blit(text, (5, 50))
     # Draw help menu if pressed
     if help_menu_pressed:
-        # Darken the background
-        s = pygame.Surface((window_size[0], window_size[1]))
-        s.set_alpha(200)                # Alpha level
-        s.fill((0,0,0))           # Black fill
-        window.blit(s, (0,0))    # (0,0) are the top-left coordinates
+        window.blit(TransperentRect, (0,0))    # (0,0) are the top-left coordinates
         draw_help_menu()
-        
+
+    # Draw info menu if pressed
+    if info_menu_pressed:
+        window.blit(TransperentRect, (0,0))    # (0,0) are the top-left coordinates
+        draw_info_menu()        
 
     # Update the display
     pygame.display.flip()
