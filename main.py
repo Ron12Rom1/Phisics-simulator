@@ -79,10 +79,10 @@ def simulate_physics():
 
         # Check for collision with walls
         if ball['x'] <= ball['radius']:
-            ball['vector']['x'] *= -1  # Reverse horizontal velocity
+            ball['vector']['x'] *= bounce_factor  # Reverse horizontal velocity
             ball["x"] = ball['radius'] + 1
         if ball['x'] >= window_size[0] - ball['radius']:
-            ball['vector']['x'] *= -1  # Reverse horizontal velocity
+            ball['vector']['x'] *= bounce_factor # Reverse horizontal velocity
             ball["x"] = window_size[0] - ball['radius'] - 1
 
     # Check for collisions between balls
@@ -176,7 +176,32 @@ def draw_line_for_catapulted_ball(original_x, original_y, mouse_x, mouse_y, colo
     color = balls[heled_ball]["color"]
     pygame.draw.line(window, (color[0] * 0.8, color[1] * 0.8, color[2] * 0.8), (original_x, original_y), (mouse_x, mouse_y), int(min(size, 10)))
 
-
+def draw_help_menu():
+    # Close help menu
+    global help_menu_pressed
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_ESCAPE]:
+        help_menu_pressed = False
+    
+    # Draw help menu keyboard controls
+    font = pygame.font.Font(None, 36)
+    help_texts = [
+        "Help Menu:",
+        "   Left Click: - - - - - - - - - - - - - Create balls",
+        "   Right Click + Drag: - - - - - - Drag and trow balls",
+        "   Right Click + Ctrl + Drag: - Catapult balls",
+        "   R: - - - - - - - - - - - - - - - - - - - Reset all variables",
+        "   C: - - - - - - - - - - - - - - - - - - - Clear all balls",
+        "   H: - - - - - - - - - - - - - - - - - - - Show help menu",
+        "   UP/DOWN Arrow: - - - - - - - Change bounce factor",
+        "   SPACE: - - - - - - - - - - - - - - - Pause/Resume physics",
+        "   SHIFT: - - - - - - - - - - - - - - - Toggle color based on velocity",
+        "   CTRL + K/L: - - - - - - - - - - - Increase/Decrease default ball size when creating new balls",
+        "   K/L: - - - - - - - - - - - - - - - - - Increase/Decrease size of all existing balls"
+    ]
+    for i, text in enumerate(help_texts):
+        rendered_text = font.render(text, True, (255, 255, 255))
+        window.blit(rendered_text, (100, 90 + i * 35))
 # Reset all variables
 def reset_all():
     balls.clear()
@@ -212,6 +237,7 @@ global default_ball_size
 default_ball_size = 20
 global heled_ball
 heled_ball = None
+help_menu_pressed = False
 original_x, original_y = None, None
 
 # Create floor
@@ -238,7 +264,7 @@ while running:
 
     
     # Check for mouse click events
-    if pygame.mouse.get_pressed()[0]:  # Left mouse button
+    if pygame.mouse.get_pressed()[0] and not(help_menu_pressed):  # Left mouse button
         mouse_x, mouse_y = pygame.mouse.get_pos()
         if len(balls) == 0:
             create_ball(mouse_x, mouse_y, 0, 0, 20)
@@ -247,7 +273,7 @@ while running:
             for i in range(times):
                 create_ball(mouse_x, mouse_y, 0, 0, default_ball_size)
     # Catapult ball from its original position
-    elif pygame.mouse.get_pressed()[2] and keys[pygame.K_LCTRL]:  # Right mouse button
+    elif pygame.mouse.get_pressed()[2] and keys[pygame.K_LCTRL] and not(help_menu_pressed):  # Right mouse button
         mouse_x, mouse_y = pygame.mouse.get_pos()
         if heled_ball == None:
             for ball in balls:
@@ -264,7 +290,7 @@ while running:
             color = (color[0] * 0.8, color[1] * 0.8, color[2] * 0.8)
             draw_start_point_for_catapuled_ball(original_x, original_y, color)
             draw_line_for_catapulted_ball(original_x, original_y, mouse_x, mouse_y, color)
-    elif not pygame.mouse.get_pressed()[2] and keys[pygame.K_LCTRL] and heled_ball != None and original_x and original_y:
+    elif not pygame.mouse.get_pressed()[2] and keys[pygame.K_LCTRL] and heled_ball != None and original_x and original_y and not(help_menu_pressed):
         if len(balls) > 0 and heled_ball != None:
             new_vector_x, new_vector_y = calc_vector(original_x, original_y, mouse_x, mouse_y, flip = True)
             balls[heled_ball]["vector"]["x"], balls[heled_ball]["vector"]["y"] = new_vector_x*0.2, new_vector_y*0.2
@@ -272,7 +298,7 @@ while running:
             balls[heled_ball]["is_held"] = False
             heled_ball = None
     # Drag and drop balls
-    elif pygame.mouse.get_pressed()[2]:  # Right mouse button
+    elif pygame.mouse.get_pressed()[2] and not(help_menu_pressed):  # Right mouse button
         mouse_x, mouse_y = pygame.mouse.get_pos()
         if heled_ball == None:
             for ball in balls:
@@ -282,7 +308,7 @@ while running:
         else:
             balls[heled_ball]["x"] = mouse_x
             balls[heled_ball]["y"] = mouse_y
-    elif not pygame.mouse.get_pressed()[2]:
+    elif not pygame.mouse.get_pressed()[2] and not(help_menu_pressed) :
         if len(balls) > 0 and heled_ball != None:
             balls[heled_ball]["vector"]["x"], balls[heled_ball]["vector"]["y"] = calc_vector(mouse_pos[-3][0], mouse_pos[-3][1], mouse_x, mouse_y)
             balls[heled_ball]["is_held"] = False
@@ -292,7 +318,10 @@ while running:
     if keys[pygame.K_c]:
         balls.clear()
     if keys[pygame.K_r]:
-        reset_all()        
+        reset_all()
+    # Toggle help menu
+    if keys[pygame.K_h]:
+        help_menu_pressed = True
     # Change the bounce factor
     if keys[pygame.K_UP]:
         bounce_factor -= 0.01
@@ -300,7 +329,7 @@ while running:
         bounce_factor += 0.01
     # Enable / disable physics
     space_pressed = True
-    if keys[pygame.K_SPACE]:
+    if keys[pygame.K_SPACE] or help_menu_pressed:
         space_pressed = False
     if space_pressed:
         simulate_physics()
@@ -340,6 +369,15 @@ while running:
     font = pygame.font.Font(None, 24)
     text = font.render(f"Bounce factor: {bounce_factor}", True, (255, 255, 255))
     window.blit(text, (5, 50))
+    # Draw help menu if pressed
+    if help_menu_pressed:
+        # Darken the background
+        s = pygame.Surface((window_size[0], window_size[1]))
+        s.set_alpha(200)                # Alpha level
+        s.fill((0,0,0))           # Black fill
+        window.blit(s, (0,0))    # (0,0) are the top-left coordinates
+        draw_help_menu()
+        
 
     # Update the display
     pygame.display.flip()
